@@ -1,7 +1,7 @@
 <!-- Python 3.13.5 -->
 
 
-# Hate Speech Detection API
+# API Based Deepfake, Hatespeech, scams and False info detector
 
 ![Project Logo](static/prodemo.png)
 
