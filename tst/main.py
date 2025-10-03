@@ -14,13 +14,11 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import uuid
 from functools import wraps
-import pytesseract  # OCR for text detection
+import pytesseract 
 from flask_cors import CORS
-# ---------------- Flask App ----------------
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  
 CORS(app, supports_credentials=True) 
-# ---------------- CORS ----------------
 @app.after_request
 def after_request(response):
     origin = request.headers.get('Origin')
@@ -31,12 +29,10 @@ def after_request(response):
     response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
     return response
 
-# ---------------- Models ----------------
 print("Loading deepfake detection model...")
 deepfake_detector = pipeline("image-classification", model="Wvolf/ViT_Deepfake_Detection", use_fast=True)
 print("Model loaded!")
 
-# ---------------- API Key Manager ----------------
 api_keys = {}
 api_usage = {}
 
@@ -74,7 +70,6 @@ def generate_api_key(tier='free'):
     api_usage[key] = {}
     return key
 
-# ---------------- Scam Keywords ----------------
 SCAM_KEYWORDS = {
     "employment": ["job", "part time", "work from home", "typing work", "data entry"],
     "loan": ["loan", "credit", "instant loan", "personal loan"],
@@ -106,7 +101,6 @@ def keyword_scam_detector(text):
         "verdict": verdict
     }
 
-# ---------------- Routes ----------------
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -129,7 +123,6 @@ def create_api_key():
     key = generate_api_key(tier)
     return make_response(jsonify({'api_key': key, 'tier': tier, 'daily_limit': api_keys[key].daily_limit}))
 
-# ---------------- Main Analyzer ----------------
 @app.route('/api/analyze', methods=['POST'])
 @require_api_key
 def analyze():
@@ -150,7 +143,6 @@ def analyze():
         except Exception as e:
             return make_response(jsonify({'error': f'Invalid image: {str(e)}'}), 400)
 
-        # --- Step 1: OCR Detection ---
         text = pytesseract.image_to_string(image).strip()
         if text:
             scam_check = keyword_scam_detector(text)
@@ -162,7 +154,6 @@ def analyze():
                 'verdict': scam_check['verdict']
             }))
 
-        # --- Step 2: Deepfake Detection (only if no text) ---
         result = deepfake_detector(image)
         prediction = max(result, key=lambda x: x['score'])
         label = prediction['label'].lower()
@@ -201,7 +192,6 @@ def predict():
         except Exception as e:
             return make_response(jsonify({'error': f'Invalid image: {str(e)}'}), 400)
 
-        # --- Step 1: OCR Detection ---
         text = pytesseract.image_to_string(image).strip()
         if text:
             scam_check = keyword_scam_detector(text)
@@ -213,7 +203,6 @@ def predict():
                 'verdict': scam_check['verdict']
             }))
 
-        # --- Step 2: Deepfake Detection (only if no text) ---
         result = deepfake_detector(image)
         prediction = max(result, key=lambda x: x['score'])
         label = prediction['label'].lower()
