@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "DeepFake Detector for WhatsApp",
+  "version": "1.0",
+  "description": "Detects deepfakes in WhatsApp images using AI",
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": [
+    "https://web.whatsapp.com/*",
+    "http://localhost:5000/*"
+  ],
+  "content_scripts": [{
+    "matches": ["https://web.whatsapp.com/*"],
+    "js": ["content.js"],
+    "run_at": "document_end"
+  }],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "DeepFake Detector"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}

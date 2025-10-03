@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Me - Akhil</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> -->
+   <link rel="stylesheet" href="all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: 'red',
+            secondary: 'rgb(100 255 218 / var(--tw-text-opacity, 1))',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body{
+      background-color: gray;  
+    }
+</style>
+</head>
+<body>
+    <nav class="fixed w-full z-50 transition-all duration-300 bg-transparent">
+        <div class="max-w-screen-x1 mx-auto px-4">
+            <div class="flex items-center justify-between h-16 md:h-20">
+                <a class="flex items-center space-x-2" href="/">
+                    <div class="flex items-center space-x-2" style="opacity: 1;">
+                        <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" class="text-secondary text-2xl md:text-3xl" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="m7.375 16.781 1.25-1.562L4.601 12l4.024-3.219-1.25-1.562-5 4a1 1 0 0 0 0 1.562l5 4zm9.25-9.562-1.25 1.562L19.399 12l-4.024 3.219 1.25 1.562 5-4a1 1 0 0 0 0-1.562l-5-4zm-1.649-4.003-4 18-1.953-.434 4-18z"></path></svg>
+                        <div class="flex flex-col">
+                            <span class="text-text-primary font-bold text-lg md:text-xl">Akhil <span class="text-secondary">.dev</span></span>
+                            <span class="text-text-secondary text-xs md:text-sm sm:block">Software Engineering Student</span>
+
+                        </div>               
+                    </div>
+                </a>
+                <div class=" md:flex items-center space-x-8">
+                    <ul class="flex space-x-8">
+                    <li><a class="text-sm font-medium cursor-pointer transition-colors relative group text-text-accent active">
+                            Home
+                            <span class="absolute -bottom-2 left-0 w-full h-0.5 bg-text-accent transform origin-left transition-transform duration-300 scale-x-100">
+                            </span>
+                        </a>
+                    </li>
+
+                    <li><a class="text-sm font-medium cursor-pointer transition-colors relative group text-text-accent active">
+                            Github
+                            <span class="absolute -bottom-2 left-0 w-full h-0.5 bg-text-accent transform origin-left transition-transform duration-300 scale-x-100">
+                            </span>
+                        </a>
+                    </li>
+
+                    <li><a class="text-sm font-medium cursor-pointer transition-colors relative group text-text-accent active">
+                            Telegram
+                            <span class="absolute -bottom-2 left-0 w-full h-0.5 bg-text-accent transform origin-left transition-transform duration-300 scale-x-100">
+                            </span>
+                        </a>
+                    </li>
+
+                    <li><a class="text-sm font-medium cursor-pointer transition-colors relative group text-text-accent active">
+                            Contact
+                            <span class="absolute -bottom-2 left-0 w-full h-0.5 bg-text-accent transform origin-left transition-transform duration-300 scale-x-100">
+                            </span>
+                        </a>
+                    </li>
+                    </ul>
+                </div>
+
+
+            </div>
+        </div>
+
+    </nav>
+</body>

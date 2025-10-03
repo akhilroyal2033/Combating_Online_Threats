@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Hate Speech & Deep Fake Detector</title>
+    <script src="tw.js"></script>
+    <link rel="stylesheet" href="all.min.css">
+    <!-- <link rel="preconnect" href="Inter-VariableFont_opsz,wght.ttf">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
+    <link href="f.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#6366F1', // Indigo 500
+                        'primary-hover': '#4F46E5', // Indigo 600
+                        secondary: '#6B7280',
+                        danger: '#EF4444', // Red 500
+                        warning: '#F59E0B', // Amber 500
+                        success: '#10B981', // Emerald 500
+                        'slate': {
+                            900: '#0F172A',
+                            800: '#1E293B',
+                            700: '#334155',
+                            600: '#475569',
+                            400: '#94A3B8',
+                            300: '#CBD5E1',
+                        }
+                    },
+                    screens: {
+                        'xs': '475px',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1E293B; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6366F1; }
+        
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6); /* bg-slate-800/60 */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(71, 85, 105, 0.5); /* border-slate-700/50 */
+        }
+        body {
+            background: radial-gradient(125% 125% at 50% 10%, #0F172A 40%, #6366F1 100%);
+            background-attachment: fixed;
+            width: 350px; /* Optimized for browser extension popup */
+            min-height: 400px;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-300 font-sans antialiased flex flex-col">
+    <nav class="sticky top-0 z-50 bg-slate-900/70 backdrop-blur-lg border-b border-slate-800 px-4 py-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-shield-alt text-primary text-xl mr-2"></i>
+                <span class="text-lg font-bold text-white">HS Detector</span>
+            </div>
+            <a href="https://github.com/akhilroyal2033/Hate-Speech" target="_blank" class="text-slate-400 hover:text-white transition-colors">
+                <i class="fab fa-github text-xl"></i>
+            </a>
+        </div>
+    </nav>
+
+    <main class="flex-grow px-4 py-6">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-extrabold text-white tracking-tight">
+                WhatsApp Hate Speech & Deep Fake Detector
+            </h1>
+            <p class="mt-2 text-sm text-slate-400">
+                Extension active on WhatsApp Web!
+            </p>
+            <p id="stats" class="mt-2 text-sm text-slate-300">
+                Messages analyzed: 0 | Hate: 0 | Offensive: 0 | Safe: 0
+            </p>
+        </div>
+
+        <div class="glass-card rounded-xl shadow-lg p-4">
+            <form id="relativeForm" class="space-y-4">
+                <div>
+                    <label for="relativeNumber" class="block text-sm font-semibold text-slate-300 mb-1">
+                        Relative's Phone Number
+                    </label>
+                    <input 
+                        type="text" 
+                        id="relativeNumber" 
+                        placeholder="+91XXXXXXXXXX" 
+                        class="w-full px-3 py-2 bg-slate-900/80 border border-slate-700 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm text-slate-300 placeholder-slate-500"
+                    >
+                </div>
+                <div class="flex justify-end">
+                    <button 
+                        type="submit" 
+                        id="saveRelative"
+                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-primary transition-all duration-200 transform hover:scale-105"
+                    >
+                        <i class="fas fa-save mr-2"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-4 px-4">
+        <p class="text-center text-xs text-slate-500">
+            &copy; 2025 HateSpeech & DeepFake Detector, Made with <i class="fa-solid fa-heart text-red-500"></i> by Akhil.
+        </p>
+    </footer>
+
+    <script src="popup.js"></script>
+</body>
+</html>

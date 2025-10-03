@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hate Speech Detection - AI Analysis Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#6366F1', // Indigo 500
+                        'primary-hover': '#4F46E5', // Indigo 600
+                        secondary: '#6B7280',
+                        danger: '#EF4444', // Red 500
+                        warning: '#F59E0B', // Amber 500
+                        success: '#10B981', // Emerald 500
+                        'slate': {
+                            900: '#0F172A',
+                            800: '#1E293B',
+                            700: '#334155',
+                            600: '#475569',
+                            400: '#94A3B8',
+                            300: '#CBD5E1',
+                        }
+                    },
+                    screens: {
+                        'xs': '475px',
+                    },
+                    animation: {
+                        'aurora': 'aurora 60s linear infinite',
+                    },
+                    keyframes: {
+                        aurora: {
+                            from: {
+                                backgroundPosition: '50% 50%, 50% 50%',
+                            },
+                            to: {
+                                backgroundPosition: '350% 50%, 350% 50%',
+                            },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1E293B; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6366F1; }
+        
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6); /* bg-slate-800/60 */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(71, 85, 105, 0.5); /* border-slate-700/50 */
+        }
+        canvas {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+
+        /* Avatar container should not have visible borders or background */
+        #avatarContainer {
+            background: transparent;
+            border: none;
+        }
+    </style> -->
+<style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #1E293B; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6366F1; }
+    
+    /* Glassmorphism Card Style */
+    .glass-card {
+        background: rgba(30, 41, 59, 0.6); /* bg-slate-800/60 */
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(71, 85, 105, 0.5); /* border-slate-700/50 */
+    }
+    canvas {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* Avatar container should not have visible borders or background */
+    #avatarContainer {
+        background: transparent;
+        border: none;
+    }
+    body {
+        background: radial-gradient(125% 125% at 50% 10%, #0F172A 40%, #6366F1 100%);
+        background-attachment: fixed;
+    }
+</style>
+</head>
+<body class="bg-slate-900 text-slate-300 font-sans antialiased min-h-screen flex flex-col">
+    <!-- <div class="absolute top-0 left-0 w-full h-full -z-10 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(125%_125%_at_50%_10%,#0F172A_40%,#6366F1_100%)] opacity-20"></div>
+    </div> -->
+
+    <nav class="sticky top-0 z-50 bg-slate-900/70 backdrop-blur-lg border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-shield-alt text-primary text-2xl mr-3"></i>
+                        <span class="text-xl font-bold text-white hidden xs:block">HateSpeech Detector</span>
+                        <span class="text-xl font-bold text-white xs:hidden">HS Detector</span>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center space-x-6">
+                    <a href="/about" class="text-slate-400 hover:text-white transition-colors duration-200">About</a>
+                    <a href="/api" class="text-slate-400 hover:text-white transition-colors duration-200">API Documentation</a>
+                    <a href="https://github.com/akhilroyal2033/Hate-Speech" target="_blank" class="text-slate-400 hover:text-white transition-colors duration-200">
+                        <i class="fab fa-github text-2xl"></i>
+                    </a>
+                </div>
+                <div class="flex items-center sm:hidden">
+                    <button type="button" id="mobileMenuBtn" class="text-slate-400 hover:text-white">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobileMenu" class="hidden sm:hidden bg-slate-900/90 backdrop-blur-md border-t border-slate-800">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="/about" class="block px-3 py-2 text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-md">About</a>
+                <a href="/api" class="block px-3 py-2 text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-md">API</a>
+                <a href="https://github.com/akhilroyal2033/Hate-Speech" target="_blank" class="block px-3 py-2 text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-md">
+                    GitHub <i class="fab fa-github ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+            <div class="text-center mb-12 sm:mb-20">
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight">
+                    <span class="block">Real-time Hate Speech</span>
+                    <span class="block bg-gradient-to-r from-indigo-400 to-purple-400 text-transparent bg-clip-text mt-2">
+                        Detection with AI
+                    </span>
+                </h1>
+                <p class="mt-6 max-w-md mx-auto text-lg text-slate-400 sm:text-xl md:mt-8 md:max-w-3xl">
+                    Our advanced AI analyzes text for hate speech and offensive language to help you build safer online communities.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-5 lg:gap-8 items-start">
+                
+                <div class="lg:col-span-2 mb-8 lg:mb-0 lg:sticky lg:top-24 w-full h-[250px] md:h-[300px] lg:h-[280px]">
+                    <div id="avatarContainer" class="w-full h-full"></div>
+                </div>
+
+                <div class="lg:col-span-3 space-y-6">
+                    <div id="how-it-works" class="glass-card rounded-2xl shadow-lg p-5 sm:p-6">
+                        <form id="predictionForm" class="space-y-4">
+                            <div>
+                                <label for="textInput" class="block text-md font-semibold text-slate-300 mb-2">
+                                    Analyze Your Text
+                                </label>
+                                <textarea 
+                                    name="text" 
+                                    id="textInput" 
+                                    rows="4"
+                                    class="w-full px-4 py-3 bg-slate-900/80 border border-slate-700 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-base text-slate-300 placeholder-slate-500"
+                                    placeholder="Paste or type text here and see the magic..."
+                                ></textarea>
+                            </div>
+                            <div class="flex justify-end">
+                                <button 
+                                    type="submit" 
+                                    class="inline-flex items-center px-6 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-primary transition-all duration-200 transform hover:scale-105"
+                                >
+                                    <i class="fas fa-search mr-2"></i> Analyze Text
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="loading" class="hidden">
+                        <div class="flex justify-center items-center py-8">
+                            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+                        </div>
+                    </div>
+
+                    <div id="result" class="space-y-6 hidden">
+                        <div id="prediction" class="glass-card rounded-2xl shadow-lg p-5 sm:p-6"></div>
+                        
+                        <div id="probabilities" class="glass-card rounded-2xl shadow-lg p-5 sm:p-6">
+                            <h3 class="text-lg font-semibold text-white mb-4">Content Analysis Breakdown</h3>
+                            <div class="h-[300px]">
+                                <canvas id="analysisChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="about" class="mt-24 sm:mt-32">
+                <h2 class="text-3xl font-bold tracking-tight text-white text-center mb-12">Why Choose Our AI?</h2>
+                <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+                    <div class="glass-card rounded-2xl p-8 transition-all duration-300 hover:border-primary/80 hover:-translate-y-1">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/20 text-primary mb-5">
+                            <i class="fas fa-brain text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white">Advanced AI Model</h3>
+                        <p class="mt-3 text-slate-400">
+                            Our AI model is trained on a diverse dataset to accurately identify and classify potentially harmful content.
+                        </p>
+                    </div>
+                    <div class="glass-card rounded-2xl p-8 transition-all duration-300 hover:border-primary/80 hover:-translate-y-1">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/20 text-primary mb-5">
+                            <i class="fas fa-chart-bar text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white">Detailed Analysis</h3>
+                        <p class="mt-3 text-slate-400">
+                            Get comprehensive insights with probability scores for different categories of content.
+                        </p>
+                    </div>
+                    <div class="glass-card rounded-2xl p-8 transition-all duration-300 hover:border-primary/80 hover:-translate-y-1">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/20 text-primary mb-5">
+                            <i class="fas fa-bolt text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white">Real-time Processing</h3>
+                        <p class="mt-3 text-slate-400">
+                            Get instant results with our high-performance backend processing system.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
+            <div class="flex justify-center space-x-6 md:order-2">
+                <a href="https://github.com/akhilroyal2033/Hate-Speech" target="_blank" class="text-slate-500 hover:text-slate-400 transition-colors">
+                    <span class="sr-only">GitHub</span>
+                    <i class="fab fa-github text-2xl"></i>
+                </a>
+            </div>
+            <div class="mt-8 md:mt-0 md:order-1">
+                <p class="text-center text-base text-slate-500">
+                    &copy; 2025 HateSpeech Detector, Made with <i class="fa-solid fa-heart text-red-500"></i> by Akhil. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import Avatar from '/static/avatar.js';
+        
+        // Initialize avatar system
+        const avatar = new Avatar('avatarContainer');
+        
+        // Socket.io setup
+        let socket = io();
+        let typingTimer;
+        let analysisChart;
+        
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Initialize charts
+        function initializeCharts() {
+            const ctx = document.getElementById('analysisChart').getContext('2d');
+            const textColor = 'rgba(203, 213, 225, 0.7)'; // text-slate-400
+            const gridColor = 'rgba(51, 65, 85, 0.5)'; // slate-700/50
+
+            analysisChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Hate Speech', 'Offensive', 'Neither'],
+                    datasets: [{
+                        label: 'Probability',
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.5)',
+                            'rgba(245, 158, 11, 0.5)',
+                            'rgba(16, 185, 129, 0.5)'
+                        ],
+                        borderColor: [
+                            '#EF4444',
+                            '#F59E0B',
+                            '#10B981'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: textColor,
+                                font: {
+                                    family: "'Inter', sans-serif"
+                                }
+                            }
+                        },
+                        x: {
+                           beginAtZero: true,
+                            max: 1,
+                            grid: {
+                                color: gridColor,
+                            },
+                            ticks: {
+                                color: textColor,
+                                font: {
+                                    family: "'Inter', sans-serif"
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('result').classList.add('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('result').classList.remove('hidden');
+        }
+
+        function updateChart(predictions) {
+            analysisChart.data.datasets[0].data = [
+                predictions.hate_speech,
+                predictions.offensive_language,
+                predictions.neither
+            ];
+            analysisChart.update();
+        }
+
+        async function displayResults(data) {
+            hideLoading();
+            
+            const predictionDiv = document.getElementById('prediction');
+            const predictions = data.prediction;
+            let maxCategory = Object.keys(predictions).reduce((a, b) => predictions[a] > predictions[b] ? a : b);
+            
+            let resultHTML = '';
+            
+            switch(maxCategory) {
+                case 'hate_speech':
+                    resultHTML = `
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0">
+                                <div class="w-12 h-12 rounded-full bg-danger/20 flex items-center justify-center">
+                                    <i class="fas fa-exclamation-triangle text-danger text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <h3 class="text-lg font-semibold text-danger mb-1">Hate Speech Detected</h3>
+                                <p class="text-sm text-slate-400 break-words">This content contains hate speech and may be harmful.</p>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'offensive_language':
+                    resultHTML = `
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0">
+                                <div class="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center">
+                                    <i class="fas fa-exclamation text-warning text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <h3 class="text-lg font-semibold text-warning mb-1">Offensive Content</h3>
+                                <p class="text-sm text-slate-400 break-words">This content may be offensive but does not constitute hate speech.</p>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'neither':
+                    resultHTML = `
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0">
+                                <div class="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center">
+                                    <i class="fas fa-check text-success text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <h3 class="text-lg font-semibold text-success mb-1">Safe Content</h3>
+                                <p class="text-sm text-slate-400 break-words">This content appears to be safe and appropriate.</p>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+
+            // Add language information if available
+            if (data.source_language && data.source_language !== 'en' && data.english_translation) {
+                resultHTML += `
+                    <div class="mt-4 pt-4 border-t border-slate-700/50 text-sm text-slate-400">
+                        <p class="mb-1"><strong class="text-slate-300">Detected Language:</strong> ${data.source_language}</p>
+                        <p class="break-words"><strong class="text-slate-300">Translation:</strong> ${data.english_translation}</p>
+                    </div>
+                `;
+            }
+
+            // Add toxic words if available
+            if (data.toxic_words && data.toxic_words.length > 0) {
+                resultHTML += `
+                    <div class="mt-4 pt-4 border-t border-slate-700/50">
+                        <h4 class="text-sm font-semibold text-slate-300 mb-2">Flagged Content & Suggestions:</h4>
+                        <div class="space-y-2">
+                            ${data.toxic_words.map(word => `
+                                <div class="text-sm text-slate-400 p-2 bg-slate-900/50 rounded-md">
+                                    <span class="font-semibold text-danger/80">"${word}"</span> &rarr; <span class="text-success/80">${data.suggestions[word]?.join(', ') || 'No suggestions available'}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            predictionDiv.innerHTML = resultHTML;
+            updateChart(predictions);
+            
+            // Start avatar conversation
+            await avatar.performConversation(data.original_text, maxCategory);
+        }
+
+        // Real-time analysis
+        document.getElementById('textInput').addEventListener('input', function(e) {
+            clearTimeout(typingTimer);
+            
+            if (e.target.value) {
+                typingTimer = setTimeout(() => {
+                    showLoading();
+                    socket.emit('analyze_text', {
+                        text: e.target.value
+                    });
+                }, 1000);
+            }
+        });
+
+        // Form submission
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const text = document.getElementById('textInput').value;
+            
+            if (text) {
+                showLoading();
+                socket.emit('analyze_text', {
+                    text: text
+                });
+            }
+        });
+
+        // Socket event handlers
+        socket.on('analysis_results', function(data) {
+            displayResults(data);
+        });
+
+        socket.on('analysis_error', function(error) {
+            hideLoading();
+            const predictionDiv = document.getElementById('prediction');
+            predictionDiv.innerHTML = `
+                <div class="bg-danger/20 text-danger p-4 rounded-lg">
+                    <p class="font-medium">Error: ${error.error}</p>
+                </div>
+            `;
+        });
+
+        // Initialize charts on page load
+        initializeCharts();
+    </script>
+</body>
+</html>
